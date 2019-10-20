@@ -1,0 +1,16 @@
+def root(a:BigDecimal):Double = {
+     @tailrec
+     def go(xi:BigDecimal): Double=
+       if(checkPrecision(xi,a)) xi.doubleValue
+       else go(xi + (a/(xi*xi)-xi)/3)
+  
+    val xo = if (a<=1) a else a/3
+    go(xo);
+  }
+
+
+
+  def checkPrecision(x:BigDecimal,a:BigDecimal): Boolean ={
+    val x3 = x*x*x
+    (x3-a).abs < (a).abs*BigDecimal("10e-55")
+  }
