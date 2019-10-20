@@ -1,0 +1,92 @@
+
+
+  let recFibonacci x =
+    let rec go n prev acc =
+      if n == 0 then prev
+      else go (n-1) acc (acc+prev)  in
+    go x 0 1
+
+  let rec fibonacci x = 
+    if x == 0 then 0
+    else if x == 1 then 1
+    else fibonacci (x-1) + fibonacci (x-2) 
+    
+  let checkPrecision = fun a xi e ->
+    let x3 = xi *. xi *. xi in 
+    abs_float(x3 -. a) < abs_float(a) *. e 
+
+  let root = fun a ->
+    let rec go = fun xi ->
+    if checkPrecision a xi 10e-55 then xi
+    else go  (xi +. (a /. (xi *. xi)-.xi) /. 3.0) in
+    let xo = if a <= 1.0 then a else a /. 3.0 in
+    go xo
+        
+  (*let xs = [-2;-1;0;1;2]
+    let [_;_;x;_;_] = xs
+    let [_;(x,_)]   [ (1,2); (0,1) ]
+   *)
+
+  let rec isSequence = fun xs xss ->
+   match (xs,xss) with 
+     (h::t,hd::tl) when h = hd -> true && isSequence t tl
+     | (_,[]) -> true
+     | _ -> false
+  
+
+     let replaceNth = fun xs n a ->
+       let rec go = fun nr xss ->
+         match xss with
+           h::t -> if nr = n then a::t else h:: go (nr+1) t
+           | [] -> raise (Failure "indeks wychodzi poza zakres listy") in 
+       go 0 xs    
+
+  def replaceNth[A](xs:List[A],n:Int,a:A):List[A] = {
+    def go(nr:Int,xss:List[A]):List[A]=
+       xss match {
+         case h::t => if(nr==n) a::t else h::go(nr+1,t)
+         case Nil => throw new Exception("indeks wykracza poza zakres listy")
+       }
+    if (n<0) throw new Exception("arguemnt nie moze byc ujemny");
+    go(0,xs)
+  }
+
+
+  def root(a:Double):Double = {
+     @tailrec
+     def go(xi:Double): Double={
+       if(checkPrecision(xi,a,10e-55)) xi
+       else go(xi + (a/(xi*xi)-xi)/3)
+  }
+    val xo = if (a<=1) a else a/3
+    go(xo);
+  }
+
+  def checkPrecision(x:Double,a:Double,e:Double): Boolean ={
+    val x3 = x*x*x
+    Math.abs(x3-a)<Math.abs(a)*e
+  }
+
+  def isSequence[A](x:List[A],xs:List[A]): Boolean ={
+    (x,xs) match {
+      case (h::t,hd::tl) if h==hd => true && isSequence(t,tl)
+      case (_,Nil) => true
+      case _ => false
+    }
+
+  }
+
+  def fibonacciRec(n:Int):Int = {
+    @tailrec
+    def go(n:Int,acc:Int,prev:Int):Int = {
+      if (n == 0) prev
+      else go(n-1,acc+prev,acc)
+    }
+    go(n,1,0)
+  }
+
+  def fibonacci(n:Int):Int = {
+    if (n == 0) 0
+    else if (n == 1) 1
+    else fibonacci(n-1) + fibonacci(n-2)
+  }
