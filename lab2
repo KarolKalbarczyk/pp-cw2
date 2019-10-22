@@ -1,0 +1,69 @@
+    println(luckyNumbers())
+    println(findBad(List(1,7,6,6,1,7,5)))
+    print(root(100))
+    println(findPrimes(List(1,2,3,4,5,6,7)))
+
+  }
+
+    def findPrimes(xs:List[Int]):List[Int] =
+      xs match {
+        case h::t if h!=1 => h::findPrimes (t filter (x=>x%h != 0))
+        case h::t =>  findPrimes(t)
+        case Nil => Nil
+
+      }
+
+
+  def addDigits(s:String):Int={
+    s.foldLeft(0)((z, i) => z + i.asDigit)
+  }
+
+  def checkNumber(s:String):Boolean= {
+    addDigits(s.substring(0,3)) == addDigits((s.substring(3,6)))
+  }
+
+  def completeZeros(s:String):String= {
+    if(s.length <6) completeZeros("0" ++ s)
+    else s
+  }
+
+  def luckyNumbers():List[String] = {
+    @tailrec
+    def go(n:Int,xs:List[String]):List[String]= {
+      if (n == 1000000) xs
+      else {
+        val y = completeZeros(n.toString)
+        if (checkNumber(y)) go(n + 1,y::xs)
+        else go(n + 1,xs)
+      }
+    }
+    go(0,Nil)
+  }
+
+  def findBad(xs:List[Int]):Int = {
+    def go (xss:List[Int]):Int =
+    xss match {
+      case h::Nil => h
+      case h::m::t => if(h!=m) h else go(t)
+      }
+    go(xs.sorted)
+    }
+    
+      let isntNumber x y = x = y
+  
+  let filter xss x =
+     List.filter (fun xs -> not (List.exists (fun a -> isntNumber x a) xs)) xss
+
+
+   let rec power f n = 
+     if n = 0 then 1 
+     else  f*(power f (n - 1));;   
+
+  let binary xs = 
+    let xss = List.rev xs in
+    let rec go xs n =
+    match xs with 
+      [] -> 0
+      | h::t -> h*(power 2 n) + (go t (n+1)) in
+    go xss 0
+       
