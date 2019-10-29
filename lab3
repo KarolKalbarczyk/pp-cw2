@@ -1,0 +1,37 @@
+let rec foldLeft = fun  f1 f2 acc xs ->
+  match xs with 
+  [] -> acc
+  | (a,b)::t -> foldLeft f1 f2 (f1 a (fst acc),f2 b (snd acc)) t
+
+  
+
+  let rec foldRight f1 f2 acc xs  = 
+  match xs with
+  (a,b)::t -> let result = (foldRight f1 f2 acc t) in (f1 a (fst(result)),f2 b (snd(result)))
+  | [] -> acc
+  
+   sealed abstract class Calculator
+
+  def base= (a:Double,b:Double)=> a*b
+  def basecircle= (a:Double,b:Double)=> a*b*Math.PI
+  def baseHexagon= (a:Double,b:Double) => 3*a*a*Math.sqrt(3)/2
+ def known = (area:Double,a:Double) => area
+
+  def volume(f: (Double,Double) =>Double,height:Double,a:Double,b:Double) = height*f(a,b)
+  def volumeCube(height:Double,a:Double) = volume(base,height,a,a)
+  def volumeCuboid(height:Double,a:Double,b:Double) = volume(base,height,a,b)
+  def volumeRoler(height:Double,r:Double) = volume(basecircle,height,r,r)
+  def volumeElipsoid(height:Double,a:Double,b:Double) = volume(basecircle,height,a,b)
+  def volumeKnown(height:Double,area:Double) = volume(known,height,area,0)
+  def volumeHexagon(height:Double,a:Double)  = volume(baseHexagon,height,a,a);
+
+  object Calculator {
+    final case class Add(n1:Double,n2:Double) extends Calculator
+    final case class Negate(number:Double) extends Calculator
+  }
+
+  def calculate(calc:Calculator)=
+    calc match {
+      case Calculator.Add(n1, n2) => n1+n2
+      case Calculator.Negate(number) => (-number)
+    }
