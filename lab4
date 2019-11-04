@@ -1,0 +1,64 @@
+ def sum[A](t:BT[A]) = traverse(t).length
+
+  def foldLeft[A,B](t:BT[A])(f:(B,A)=> B)(acc:B) = traverse(t).foldLeft(acc)(f)
+  def map[A,B](t:BT[A])(f:(A)=> B):BT[B]  =
+    t match {
+      case Empty => Empty
+      case Node(elem, left, right) => Node(f(elem),map(left)(f),map(right)(f))
+    }
+
+  def depth[A,B](t:BT[A] ):Int = {
+    def go(xs:List[BT[A]],n:Int):List[Int] =
+      xs match {
+        case h::t => h match {
+          case Empty => Nil
+          case Node(elem, left, right) => n::go(t++List(left,right),n+1)
+        }
+        case Nil => Nil
+      }
+    go(List(t),0).max
+  }
+
+
+  def traverse[A,B](t:BT[A] ):List[A] = {
+    def go(xs:List[BT[A]]):List[A] =
+      xs match {
+        case h::t => h match {
+          case Empty => go(t)
+          case Node(elem, left, right) => elem::go(t++List(left,right))
+        }
+        case Nil => Nil
+      }
+   go(List(t))
+  }
+
+  val primes = {
+    def sieve(lxs: Stream[Int]): Stream[Int] = {
+      if(!lxs.isEmpty) {
+        val (p, xs) = (lxs.head, lxs.tail)
+        p #:: sieve(xs.filter(n=> n%p != 0))
+      }else Stream.empty
+    }
+  }
+  
+    sealed trait BT[+A]
+  case object Empty extends BT[Nothing]
+  case class Node[+A](elem:A, left:BT[A], right:BT[A]) extends BT[A]
+ 
+let product t = List.fold_left (fun acc x -> x*acc) 1 (breathSearch t)  
+let sum t = List.fold_left (fun acc x -> x+acc) 0 (breathSearch t)  
+let product t x = List.mem x (breathSearch t)  
+
+let breathSearch t =
+  let rec go xs =
+    match xs with 
+    []->[]
+    | _ -> (List.flatten (List.map (fun bt -> match bt with 
+     Node(e,_,_) -> [e]
+     | _ -> []) xs)) @ (go (List.flatten (List.map (fun bt -> match bt with 
+     Node(_,l,r) -> [l;r]
+     | _ -> []) xs))) in
+  match t with 
+    Node(e,l,r) -> e::go([l;r])
+    | _ -> []
+type 'a bt = Empty | Node of 'a * 'a bt * 'a bt;;
