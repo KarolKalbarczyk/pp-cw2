@@ -1,0 +1,256 @@
+  def sumProd(xs:List[Int]) =
+    xs.foldLeft((0,1))((acc,x) => (x+acc._1,x*acc._2));
+
+  def curry3[A,B,C,D](f: (A,B,C) => D):A=>B=>C=>D =
+    (a:A)=>(b:B)=>(c:C)=>f(a,b,c)
+
+  def uncurry3[A,B,C,D](f: A=>B=>C=>D ):(A,B,C) => D =
+    (a:A,b:B,c:C)=> f (a) (b) (c)
+
+  def br3[A](t:BT[A]):List[A] = {
+    def go(xs:List[BT[A]]):(List[BT[A]],List[A]) =
+      xs match {
+        case h::t => h match {
+          case Empty => go(t)
+          case Node(elem, left, right) => val x = go(t); (left::right::x._1,elem::x._2)
+        }
+        case Nil => (Nil,Nil)
+      }
+    def go2(xs:List[BT[A]]):List[A] = {
+      xs match {
+        case Nil => Nil
+        case _ => val x = go(xs); x._2:::go2(x._1)
+      }
+    }
+    t match {
+      case Empty => Nil
+      case Node(elem, left, right) => go2(List(left,right))
+    }
+  }
+
+  def br4[A](t:BT[A]):List[A] = {
+    def go(xs:List[BT[A]]):List[A] =
+      xs match {
+        case h::t => h match {
+          case Empty => go(t)
+          case Node(elem, left, right) => elem::go(t++List(left,right))
+        }
+        case Nil => Nil
+      }
+    t match {
+      case Empty => Nil
+      case Node(elem, left, right) => go(List(left,right))
+    }
+  }
+
+  def br5[A](t:BT[A]):List[A] = {
+    def go(xs:List[BT[A]]):List[A] =
+      xs.filter(t => t match {
+        case Empty => false
+        case Node(elem, left, right) => true
+      }).map( t => t match {
+        case Node(elem, left, right) => elem
+      }):::go(xs.flatMap(t => t match {
+        case Empty => Nil
+        case Node(elem, left, right) => List(left,right)
+      }))
+    t match {
+      case Empty => Nil
+      case Node(elem, left, right) => go(List(left,right))
+    }
+  }
+
+  def br6[A](t:BT[A]):List[A] = {
+    def go(xs:List[BT[A]]):List[A] =
+      xs match{
+        case Nil => Nil
+        case _ => xs.flatMap(_ match {
+          case Node(e, _,_) => List(e)
+          case _ => Nil
+        }) ::: go(xs.flatMap(_ match {
+          case Empty => Nil
+          case Node(elem, left, right) => List(left,right)
+      }))}
+    t match {
+      case Empty => Nil
+      case Node(elem, left, right) => elem::go(List(left,right))
+    }
+  }
+
+  def insidepath[A](t:BT[A]):Int = {
+    def go(n:Int,tb:BT[A]):Int =
+      tb match {
+        case Empty => 0
+        case Node(_, left, right) => n+ go(n+1,left)+go(n+1,right)
+      }
+    t match {
+      case Empty => 0
+      case Node(_, left, right) => go(1,left) + go(1,right)
+    }
+  }
+
+  def outsidepath[A](t:BT[A]):Int = {
+    def go(n:Int,tb:BT[A]):Int =
+      tb match {
+        case Empty => n
+        case Node(_, left, right) => go(n+1,left)+go(n+1,right)
+      }
+    t match {
+      case Empty => 0
+      case Node(_, left, right) => go(1,left) + go(1,right)
+    }
+  }
+
+
+
+  sealed trait Graphs[A]
+  case class Graph[A](succ: A=>List[A]) extends Graphs[A]
+
+  def depthsearch[A](g:Graph[A],first:A)={
+     def go(visited:List[A],queue:List[A]):List[A] =
+       queue match {
+         case Nil => Nil
+         case h::t => if (visited.contains(h)) go(visited,t)
+                      else h::go(h::visited,g.succ(h):::queue)
+       }
+    go(Nil,List(first))
+  }
+
+
+
+  def mergeSort[A](f:(A,A) =>Int)(xs:List[A]):List[A] = {
+    def split(xs:List[A],n:Int,nr:Int):(List[A],List[A])=
+      xs match {
+        case h::t => if(n!=nr){ val y = split(t,n,nr+1); (h::y._1,y._2)} else (Nil,xs)
+        case _ => (Nil,Nil)
+      }
+    def merge(xs:List[A],xss:List[A], f: (A,A) => Int):List[A] =
+      (xs, xss) match {
+        case (h :: t, hd :: tl)  => if (f(h, hd) <= 0) h :: merge(t, xss, f) else hd :: merge(xs, tl, f)
+        case (Nil, _) => xss
+        case _ => xs
+      }
+    val n = xs.length
+    if (n != 1){
+      val (l,ls) = split(xs,n/2,0)
+      val k = mergeSort(f)(l)
+      val kk = mergeSort(f)(ls)
+      merge(k,kk,f)
+    }else xs
+  }
+
+
+
+  def insertSort[A](f:(A,A)=>Int)(xs:List[A]):List[A] = {
+    def insert(x:A,xss:List[A]):List[A] = {
+      xss match {
+        case Nil => List(x)
+        case h :: t if f(h, x) > 0 => x :: h :: t
+        case h :: t => h :: insert(x, t)
+      }
+    }
+    def go(xs:List[A],xss:List[A]):List[A] =
+      xs match {
+        case Nil => xss
+        case h::t => go(t,insert(h,xss))
+      }
+    go (xs,List())
+  }
+  
+  
+let curry f x y z = f (x,y,z)
+let uncurry f (x,y,z) = f x y z  
+  
+let rec quicksort = function xs ->
+ match xs with
+   [] -> []
+   | [x] -> [x] 
+   | xs -> let small = List.filter (fun y -> y < List.hd xs ) (List.tl xs)
+   and large = List.filter (fun y -> y >= List.hd xs ) (List.tl xs)
+   in (quicksort small) @ [List.hd xs] @ (quicksort large);;
+
+let rec quicksort' = function  
+  [] -> []
+  | x::xs -> let small = List.filter (fun y -> y < x ) xs
+  and large = List.filter (fun y -> y >= x ) xs
+  in quicksort' small @ (x :: quicksort' large);;
+
+let sumProd xs = 
+  List.fold_left ( fun acc x ->
+    (x+ (fst acc),x*(snd acc))) (0,1) xs
+
+let rec mergeSort f xs =
+  let rec split xs n nr =
+    match xs with 
+      h::t ->  if(n<>nr) then let y =(split t n (nr+1)) in (h::(fst y),snd y) else ([],xs)  
+      | _ -> ([],[])
+  and merge xs xss f =
+    match (xs,xss) with
+      (h :: t, hd :: tl)  -> if ( (f h hd) <= 0) then h :: (merge t xss f) else hd :: (merge xs tl f)
+      | ([], _) -> xss
+      | _ -> xs
+  and n = List.length xs in
+  if (n<>1) then
+    let (l,ls) = (split xs (n/2) 0) in
+    let l1 = mergeSort f l
+    and l2 = mergeSort f ls in
+    merge l1 l2 f
+  else xs             
+
+let insertSort f xs =
+  let rec insert x xs = 
+    match xs with 
+      [] -> [x]
+      | h::t -> if (f h x)>0 then x::h::t else h::(insert x t) in 
+  let rec go xs xss =
+    match xs with 
+      [] -> xss
+      | h::t -> go t (insert h xss) in
+  go xs []        
+
+type 'a graph = Graph of ('a -> 'a list)
+type 'a bt = Empty | Node of 'a * 'a bt * 'a bt;;
+  
+
+let breathSearch t =
+  let rec go xs =
+    match xs with 
+    []->[]
+    | _ -> (List.flatten (List.map (fun bt -> match bt with 
+     Node(e,_,_) -> [e]
+     | _ -> []) xs)) @ (go (List.flatten (List.map (fun bt -> match bt with 
+     Node(_,l,r) -> [l;r]
+     | _ -> []) xs))) in
+  match t with 
+    Node(e,l,r) -> e::go([l;r])
+    | _ -> []
+
+
+let insidePath t =
+  let rec go n tb =
+    match tb with 
+      Node(_,left,right) -> n+ (go (n+1) left)+ (go (n+1) right)
+      | _ -> 0 in
+  match t with 
+    Node(_,left,right) ->  (go 1 left)+ (go 1 right)
+    | _ -> 0
+
+let outsidePath t =
+  let rec go n tb =
+    match tb with 
+      Node(_,left,right) -> (go (n+1) left)+ (go (n+1) right)
+      | _ -> n in
+  match t with 
+    Node(_,left,right) ->  (go 1 left)+ (go 1 right)
+    | _ -> 0   
+      
+
+let depthSearch (Graph succ) x =
+  let rec go vis queue =
+    match queue with 
+      [] -> []
+      | h::t -> if (List.mem h vis) then go vis t
+                else h::(go (h::vis))  ((succ h)@queue) in
+  go [] [x]                                
+
+  
