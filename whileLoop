@@ -1,0 +1,7 @@
+
+  def whileLoop(pred: =>Boolean)(e: =>Unit): Unit ={
+    if(pred){
+      e
+      while (pred)(e)
+    }
+  }
