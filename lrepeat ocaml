@@ -1,0 +1,8 @@
+
+#   let rec lrepeat n xs = 
+#     let rec repeat n x tail=
+#       if n!=0 then LCons(x, lazy( repeat (n-1) x tail))
+#       else tail in
+#     match xs with
+#     LCons(h, lazy t) -> repeat n h (lrepeat n t)
+#     | LNil -> LNil;;
