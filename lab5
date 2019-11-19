@@ -1,0 +1,91 @@
+ public static  int[] insert( int el, int[] array){
+        int[] newArray = new int[array.length+1];
+        int i = 0;
+        while( i<array.length && array[i]<el){
+            newArray[i] = array[i];
+            i++;
+        }
+        newArray[i] = el;
+        if (i<array.length){
+            for (int j = i; j <array.length ; j++) {
+                newArray[j+1] = array[j];
+            }
+        }
+        return newArray;
+    }
+    
+    
+    type 'a nlist = Koniec | Element of 'a * ('a nlist);;
+type 'a nllist = LKoniec | LElement of 'a * (unit -> 'a nllist)
+
+  let lpodziel xs = 
+    let rec even xs n = 
+      match xs with
+        LKoniec -> LKoniec
+        | LElement(h,t) -> if n = 0 then LElement(h,(fun () -> even (t()) 1)) else even (t()) 0
+    and odd xs n = 
+      match xs with
+        LKoniec -> LKoniec
+        | LElement(h,t) -> if n = 1 then LElement(h,(fun () -> odd (t()) 0)) else odd (t()) 1 in
+    (even xs 0,odd xs 0)        
+
+
+
+  let podziel xs = 
+    let rec even xs n = 
+      match xs with
+        LKoniec -> Koniec
+        | LElement(h,t) -> if n = 0 then Element(h,even (t()) 1) else even (t()) 0
+    and  odd xs n = 
+      match xs with
+        LKoniec -> Koniec
+        | LElement(h,t) -> if n = 1 then Element(h,odd (t()) 0) else odd (t()) 1 in    
+    (even xs 0,odd xs 0)        
+
+
+  let rec insert xs x =
+    match xs with
+      h::t -> if (h<x) then h::(insert t x) else x::t 
+      | _ -> []    
+
+
+  let rec lrepeat xs = 
+    let rec repeat n x tail=
+      if n!=0 then LElement(x, (fun () -> ( repeat (n-1) x tail)))
+      else tail in
+    match xs with
+    LElement(h,t) -> (repeat h h (lrepeat (t())))
+    | LKoniec -> (LKoniec)    
+    
+  let rec ltake xs = 
+  match xs with 
+    LElement(x,t) -> x::(ltake ( t()))
+   |  LKoniec -> [] 
+
+   let rec take xs = 
+    match xs with 
+      Element(x,t) -> x::(take  t)
+     |  Koniec -> [] 
+   let rec ltake2 xs = 
+    match xs with 
+      LCons(x,t) -> x::(ltake2 (Lazy.force t))
+     |  LNil -> [] 
+
+
+  let xs = (LElement(1,(fun ()-> LElement(2,(fun () -> LElement(3,(fun () -> LElement(4, fun () -> LKoniec))))))))
+  let (z,y) = podziel xs
+  let () = List.iter  (printf "%d ") (take z)  
+  let () = List.iter  (printf "%d ") (take y)  
+  let (u,i) = lpodziel xs
+  let () = List.iter  (printf "%d ") (ltake u)  
+  let () = List.iter  (printf "%d ") (ltake i)  
+
+  let a = lrepeat (LElement(1,(fun ()-> LElement(2,(fun () -> LElement(3,(fun () -> LElement(4, fun () -> LKoniec))))))))
+  let () = List.iter  (printf "%d ") (ltake a)  
+    
+     def ldzialanie[A,B](xs:Stream[A],xss:Stream[A],f: (A,A)=>B,noneValue:A): Stream[B] =
+    (xs,xss) match {
+      case (h#::t,hd#::tl) => f(h,hd)#::ldzialanie(t,tl,f,noneValue)
+      case (Stream.Empty,_) => xss.map(x => f(noneValue,x))
+      case _ => xs.map(x => f(x,noneValue))
+    }
