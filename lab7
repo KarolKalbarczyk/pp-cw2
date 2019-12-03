@@ -1,0 +1,199 @@
+object Main{
+  def main(args: Array[String]): Unit = {
+    val x = new SportCar(4)
+    x match {
+      case x : Car => println("kek")
+      case _ => println("lol")
+    }
+  }
+}
+
+trait Figure {
+ def area():Double
+ def circumference():Double
+}
+
+class Circle(private var radius:Double) extends Figure{
+  if (radius <= 0) radius = 1;
+
+  override def area(): Double =
+    radius*radius*Math.PI
+
+  override def circumference(): Double =
+    radius*2*Math.PI
+}
+
+class Square(private var a:Double) extends Figure{
+  if (a <= 0) a = 1;
+
+  override def area(): Double = a*a
+
+  override def circumference(): Double = 4*a
+}
+
+class Rectangle(private var a:Double,private var b:Double) extends Figure{
+  if (a <= 0) a = 1;
+  if (b <= 0) b = 1;
+
+  override def area(): Double = a*b
+
+  override def circumference(): Double = 2*a+2*b
+}
+
+class Triangle(private var a:Double,private var b:Double, private var c:Double) extends Figure {
+  if (a <= 0) a = 1;
+  if (b <= 0) b = 1;
+  if (c <= 0) c = 1;
+  if (a+b<c || (a+c)<b || b+c < a) a=b; c=b
+
+  override def area() = {
+    val p = 0.5+ (circumference())
+    Math.sqrt(p*(p-a)*(p-b)*(p-c))
+  }
+
+  override def circumference(): Double = a+b+c
+}
+
+class User(name:String,surname:String){
+  var email:Option[String] = Option.empty
+  var phone:Option[String] = Option.empty
+
+  def this(name:String,surname:String,email:String,phone:String){
+    this(name,surname)
+    this.email = Option(email)
+    this.phone = Option(phone)
+  }
+
+  override def hashCode(): Int = {
+    val p:Int = name.hashCode()*31
+    val p1 :Int = (p+surname.hashCode*31)
+    val p2 :Int = (p1+email.hashCode*31)
+    val p3:Int = (p2+phone.hashCode())*31
+    p3
+  }
+
+  override def equals(obj: Any): Boolean = {
+    if(obj == null) return false
+    if (!obj.isInstanceOf[User]) return false
+    val user:User = obj.asInstanceOf[User]
+    this.phone == user.phone && this.email == user.email &&
+    this.name == user.name && this.surname == user.surname
+  }
+
+}
+
+class Car(engines:Int){
+  def brum() = println("brumbrum"*engines)
+  def useHorn() = println("i hate my life")
+}
+
+class SportCar(engines:Int,maxSpeed:Int) extends Car(engines){
+  override def brum(): Unit = {
+    super.brum()
+    println("im so fast" + maxSpeed)}
+}
+
+class SuperCar(engines:Int,coolFactor:Int) extends Car(engines){
+  override def brum(): Unit = println("brumbrum"*engines*coolFactor)
+}
+
+object Signleton{}
+
+package com.company;
+
+import java.util.ArrayList;
+
+public class Main {
+
+    public static void main(String[] args) {
+	// write your code here
+    }
+}
+
+class Singleton{
+    public final static Singleton INSTANCE = new Singleton();
+
+    private Singleton(){}
+}
+
+class Author{
+    String name;
+    String age;
+    char gender;
+
+    public Author(String name, String age, char gender) {
+        this.name = name;
+        this.age = age;
+        this.gender = gender;
+    }
+}
+
+class Book{
+    String name;
+    double price;
+    ArrayList<Author> authors;
+    int quantity = 0;
+
+    public Book(String name, double price, int quantity, ArrayList<Author> authors) {
+        this.name = name;
+        this.price = price;
+        this.quantity = quantity;
+        this.authors = authors;
+    }
+
+    public Book(String name, double price, ArrayList<Author> authors) {
+        this.name = name;
+        this.price = price;
+        this.authors = authors;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    public void addAuthor(Author author){
+        authors.add(author);
+    }
+
+    public void removeAuthor(Author author){
+        authors.remove(author);
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "name='" + name + '\'' +
+                ", price=" + price +
+                ", authors=" + authorsToString() +
+                ", quantity=" + quantity +
+                '}';
+    }
+
+    private String authorsToString(){
+        var builder = new StringBuilder();
+        for (int i = 0; i <authors.size() ; i++) {
+            builder.append(authors.get(i));
+        }
+        return builder.toString();
+    }
+}
