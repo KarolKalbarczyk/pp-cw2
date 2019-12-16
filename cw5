@@ -1,0 +1,178 @@
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
+class Time(private var _hours:Int) {
+  if (_hours > 23 || _hours < 0) _hours = 0;
+
+  def hours:Int = _hours
+
+  def hours_=(hours:Int): Unit ={
+    if (hours > 23 || hours < 0) _hours = 0;
+    else _hours = hours;
+  }
+}
+
+object Time {
+
+  def apply(hours: Int): Time = new Time(hours)
+
+}
+
+class Time2(private var _hours:Int,private  var _minutes:Int) {
+  require(_hours <= 23 && _hours >= 0,"hours"+_hours )
+  require(_minutes <= 59 && _minutes >= 0,"minutes"+_minutes )
+
+  def hours:Int = _hours
+
+  def hours_=(hours:Int): Unit ={
+    require(hours <= 23 && hours >= 0,"hours"+hours )
+    _hours = hours;
+  }
+
+  def minutes:Int = _minutes
+
+  def minutes_=(minutes:Int): Unit ={
+    require(minutes <= 59 && minutes >= 0,"minutes"+minutes )
+    _minutes = minutes;
+  }
+
+  def before(time:Time2) :Boolean =
+    this._hours<time._hours || (this._hours == time._hours && this._minutes < time._minutes)
+}
+
+class Time3(hours:Int,private var _minutes:Int){
+  require(hours <= 23 && hours >= 0,"hours"+hours )
+  require(_minutes <= 59 && _minutes >= 0,"minutes"+_minutes )
+   _minutes = _minutes+hours*60;
+
+  def minutes:Int = _minutes
+
+  def setHours(hours:Int ): Unit ={
+    require(hours <= 23 && hours >= 0,"hours"+hours)
+    _minutes = _minutes%60+hours*60;
+  }
+
+  def setMinutes(minutes:Int): Unit = {
+    require(minutes <= 59 && minutes >= 0,"minutes"+minutes )
+    this._minutes = this._minutes - this._minutes%60 + minutes;
+  }
+
+  def before(time:Time3): Boolean = this.minutes<time.minutes;
+
+}
+
+class Pojazd(val producent:String,val model:String,val rokProdukcji:Int = -1,private var _numer:String = ""){
+
+  def numer:String = _numer
+
+  def this(producent:String,model:String,numer:String){
+    this(producent,model);
+    this._numer = numer;
+  }
+
+}
+
+class Queue[+T] private(private val xs:List[T],private val ys:List[T]) {
+  private val exception = new Exception();
+
+  def isEmpty:Boolean = xs == Nil;
+
+  def first():T = xs match {
+    case Nil => throw exception;
+    case h::_ => h
+  }
+
+  def enqueue[S>:T](el:S):Queue[S] =
+    if (xs == Nil) new Queue(List(el),Nil)
+    else new Queue(xs,el::ys)
+
+  def dequeue():Queue[T] = xs match {
+    case Nil => this
+    case _::Nil => new Queue(ys.reverse,Nil);
+    case _::t => new Queue(t,ys)
+  }
+
+}
+
+object Queue {
+  def empty[T] = new Queue[T](Nil,Nil);
+}
+class A(){
+  def lol() = 6;
+}
+class B() extends A(){
+  def kek() = 5;
+}
+class C() extends B(){
+  override def lol() = 7;
+}
+
+object Copy{
+  def copy[T,S>:T,K<:T](dest:ListBuffer[S], src :List[K]): Unit ={
+    src.zipWithIndex.foreach(x =>{val (v,i) = x; dest.update(i,v)})
+  }
+
+  def apply[T](dest:mutable.Seq[T], src :Seq[T]): Unit ={
+    src.zipWithIndex.foreach(x =>{val (v,i) = x; dest.update(i,v)})
+  }
+
+}
+
+
+object UzycieWyjatkow {
+  def main(args: Array[String]): Unit = {
+    try{
+      metoda1()
+    }catch {
+      case e:Exception =>
+      System.err.println(e.getMessage);
+        e.printStackTrace()
+    }
+  }
+
+  def metoda1():Unit = metoda2()
+
+  def metoda2():Unit = metoda3()
+
+  def metoda3():Unit = throw new Exception("Wyjatek zgloszony w metoda3")
+}
+
+Wyjatek zgloszony w metoda3
+  java.lang.Exception: Wyjatek zgloszony w metoda3
+  at UzycieWyjatkow$.metoda3(Time.scala:137)
+at UzycieWyjatkow$.metoda2(Time.scala:135)
+at UzycieWyjatkow$.metoda1(Time.scala:133)
+at UzycieWyjatkow$.main(Time.scala:125)
+at UzycieWyjatkow.main(Time.scala)
+
+
+abstract class Sequence[+A] {
+  def append[S>:A](x: Sequence[S]): Sequence[S]
+}
+
+object Main{
+  def main(args: Array[String]): Unit = {
+    var q : Queue[C] = Queue.empty[C]
+    var k :Queue[B]= q.enqueue(new B())
+    print(k.first().lol());
+    k = k.enqueue(new C())
+    k = k.dequeue()
+    var a: Queue[B] = k.enqueue(new C())
+    print(k.first().lol());
+    print(a.first().lol());
+    a = a.dequeue()
+    print(a.first().lol());
+    new Pojazd("6","a");
+    var t = new Time2(5,26)
+    var t2 = new Time2(6,26)
+    var t3 = new Time2(6,27)
+    println(t.before(t2))
+    println(t2.before(t3))
+    println(t2.before(t))
+    println(t3.before(t2))
+    var dsa = mutable.ListBuffer(5,6,7,9)
+    var pi = List(1,2,3,4)
+    Copy(dsa,pi)
+    println(dsa)
+  }
+}
