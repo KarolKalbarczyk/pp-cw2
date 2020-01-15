@@ -1,0 +1,34 @@
+object Main {
+  def main(args: Array[String]): Unit = {
+
+  }
+}
+
+
+class Pair[T,K](var fst:T,var snd:K){
+  override def toString: String = s"($fst,$snd)"
+}
+
+abstract class AbstractPair{
+  type T
+  type K
+  var fst: T
+  var snd: K
+}
+
+class Pracownik(var nazwisko:String){
+  var zwolniony = false;
+
+  def zwolnij(): Unit ={
+    if(!zwolniony){
+      Pracownik.count += 1
+      zwolniony = true;
+    };
+  }
+
+  def toString() = s"$nazwisko ${if(zwolniony) "zwolniony" else  }"
+}
+
+object Pracownik{
+  private var count:Int =0;
+}
