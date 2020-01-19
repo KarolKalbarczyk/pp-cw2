@@ -2,8 +2,8 @@
 class Player(val endCount: Int) extends Actor {
   private var count = 0;
   override def receive = {
-    case ("pong",other:ActorRef) => {println("ping");other ! ("ping",self);incr()}
-    case ("ping",other:ActorRef) => {println("pong");other ! ("pong",self);incr()}
+    case Player.pong => {println(Player.ping);sender() tell (Player.ping,self);incr()}
+    case Player.ping => {println(Player.pong);sender() tell (Player.pong,self);incr()}
   }
 
   def incr(): Unit ={
@@ -15,6 +15,8 @@ class Player(val endCount: Int) extends Actor {
 
 object Player{
   def props: Props = Props(classOf[Player],10)
+  val pong = "pong"
+  val ping = "ping"
 }
 
 case class Ball(count: Int)
