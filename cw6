@@ -1,0 +1,123 @@
+
+class Player(val endCount: Int) extends Actor {
+  private var count = 0;
+  override def receive = {
+    case ("pong",other:ActorRef) => {println("ping");other ! ("ping",self);incr()}
+    case ("ping",other:ActorRef) => {println("pong");other ! ("pong",self);incr()}
+  }
+
+  def incr(): Unit ={
+    count += 1;
+    if (count == endCount) context.stop(self);
+  }
+
+}
+
+object Player{
+  def props: Props = Props(classOf[Player],10)
+}
+
+case class Ball(count: Int)
+
+class Player2(val number:Int) extends Actor{
+  val rand = new Random()
+  override def receive: Receive = {
+    case (Ball(count),arr:Array[ActorRef]) => {
+      println(s"gracz nr $number rzuca rzut nr $count")
+      var index:Int = rand.nextInt(arr.length)
+      while (arr(index) == self){
+        index = rand.nextInt(arr.length)
+      }
+      arr(index) ! (Ball(count+1),arr)
+    }
+    case  _ => println("tolgo")
+
+  }
+}
+
+object Player2{
+  def props(count:Int): Props = Props(classOf[Player2],count)
+}
+
+
+
+class Pair[T,K](var fst:T,var snd:K){
+  override def toString: String = s"($fst,$snd)"
+}
+
+abstract class AbstractPair{
+  type T
+  type K
+  var fst: T
+  var snd: K
+  override def toString: String = s"($fst,$snd)"
+}
+
+class Pracownik(val nazwisko:String){
+  Pracownik.count +=1
+  var zwolniony = false;
+
+  def zwolnij(): Unit ={
+    if(!zwolniony){
+      Pracownik.count -= 1
+      zwolniony = true;
+    };
+  }
+
+  override def toString() = s"$nazwisko ${if(zwolniony) "zwolniony" else  "zatrudniony"}"
+
+  def liczbaPracowników = Pracownik.count
+}
+
+object Pracownik{
+  private var count:Int =0;
+}
+
+class Film(private var Title:String, private var Director: String, private var rok:Int){
+  override def toString: String = s"tytuł : $Title; rezyser: $Director; rok: $rok"
+}
+
+class Point(private var _x:Double = 0,private var _y:Double = 0){
+ def setX(x:Double):this.type ={this._x = x;this}
+
+ def x = this._x
+
+  def setY(y:Double):this.type ={this._y = y;this}
+
+  def y = this._y
+}
+
+class Circle(x:Double = 0,y:Double = 0, private var _radius:Double = 1) extends Point(x,y){
+  def setRadius(radius:Double):this.type ={this._radius = radius;this}
+
+  def radius = this._radius
+}
+
+class Cylinder(x:Double = 0,y:Double = 0, radius:Double = 1,private var _height:Double = 1) extends Circle(x,y,radius){
+  def setHeight(height:Double):this.type ={this._height = height;this}
+
+
+  def height = this._height
+
+}
+
+class Count extends Thread {
+    private static IntCell n = new IntCell();
+    private final static Semaphore available = new Semaphore(1, true);
+    @Override public void run() {
+        int temp;
+        for (int i = 0; i < 200000; i++) {
+           /* synchronized (n) {
+                temp = n.getN();
+                n.setN(temp + 1);
+            }*/
+            try {
+                available.acquire();
+                temp = n.getN();
+                n.setN(temp + 1);
+                available.release();
+
+            } catch (InterruptedException e) {}
+
+            }
+        }
