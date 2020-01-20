@@ -55,6 +55,18 @@ abstract class AbstractPair{
   override def toString: String = s"($fst,$snd)"
 }
 
+val p2 = new AbstractPair {
+      override type T = Int
+      override type K = String
+      override var fst = 0
+      override var snd = "ab"
+    }
+    
+    
+  def test[A <: {var fst:Int;var snd:String;var th:Int }](a:A): Unit ={
+    print(a.fst)
+  }
+
 class Pracownik(val nazwisko:String){
   Pracownik.count +=1
   var zwolniony = false;
