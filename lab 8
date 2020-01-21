@@ -1,0 +1,141 @@
+  val ourSystem = ActorSystem();
+    val ar = new Array[Int](4);
+    ar(3) = 10;
+    println(ar(3))
+
+    //p21 ! (Ball(0),Array(p21,p22,p23))
+    val dr = ourSystem.actorOf(Props(classOf[Doorman],4))
+   /* val phil = ourSystem.actorOf(Props(classOf[Philosopher],0,dr))
+    val phil1 = ourSystem.actorOf(Props(classOf[Philosopher],1,dr))
+    val phil2 = ourSystem.actorOf(Props(classOf[Philosopher],2,dr))
+    val phil3 = ourSystem.actorOf(Props(classOf[Philosopher],3,dr))
+    val phil4 = ourSystem.actorOf(Props(classOf[Philosopher],4,dr))*/
+    val prod = ourSystem.actorOf(Props(classOf[Product]))
+    val prod1 = ourSystem.actorOf(Props(classOf[Producer],prod,0))
+    val prod2 = ourSystem.actorOf(Props(classOf[Producer],prod,1))
+    val prod3 = ourSystem.actorOf(Props(classOf[Consumer],prod,0))
+    val prod4 = ourSystem.actorOf(Props(classOf[Consumer],prod,1))
+  }
+}
+
+class HelloSayer extends Actor{
+  override def receive: Receive = {
+    case "karol" => println("hi")
+    case "Obiektowość była błędem" => println("tak")
+    case "Hasselhof" => println("hi")
+    case _ => println("go away")
+  }
+}
+
+import akka.actor.{Actor, ActorRef}
+
+class Philosopher(val number: Int, doorman: ActorRef) extends Actor {
+  doorman ! (number, Philosopher.goIn)
+  var last: String = Philosopher.goIn
+
+  override def receive: Receive = {
+    case Philosopher.again => doorman ! (number, last)
+    case Philosopher.goIn => last = Philosopher.left; doorman ! (number, Philosopher.left)
+    case Philosopher.left => last = Philosopher.right; doorman ! (number, Philosopher.right)
+    case Philosopher.right => {
+      eat()
+      doorman ! (number, Philosopher.end)
+      meditate()
+      last = Philosopher.goIn
+      doorman ! (number, Philosopher.goIn)
+    }
+  }
+
+  def eat() = println(s"Philosopher number $number eating")
+
+  def meditate(): Unit = {
+    var n = 0;
+    while (n != 10000) n += 1
+  }
+}
+
+object Philosopher{
+  val end = "end"
+  val goIn = "goIn"
+  val left = "left"
+  val right = "right"
+  val again = "again"
+}
+
+import akka.actor.{Actor, ActorRef}
+
+class Producer(product: ActorRef, number: Int) extends Actor {
+  product ! 1
+
+  override def receive: Receive = {
+    case x: Int => product ! (x + 1)
+    case (x: Int, Product.waitVal) => product ! x
+  }
+
+}
+
+class Consumer(product: ActorRef, number: Int) extends Actor {
+  product ! Product.take
+
+  override def receive: Receive = {
+    case x: Int => product ! Product.take
+    case Product.waitVal => product ! Product.take
+  }
+}
+
+class Product extends Actor {
+  val array = new Array[Int](5)
+  var in = 0
+  var out = 0
+  var howManyProducts = 0
+
+  override def receive: Receive = {
+    case Product.take => if (howManyProducts == 0) sender() ! Product.waitVal else {
+      println("Consumed " + array(out))
+      sender() ! array(out);
+      array(out) = 0
+      out = (out + 1) % 5
+      howManyProducts -= 1;
+    }
+    case x: Int => if (howManyProducts == 5) sender() ! (x, Product.waitVal) else {
+      println("Produced" + x)
+      array(in) = x
+      in = (in + 1) % 5
+      howManyProducts += 1
+      sender() ! x
+
+    }
+  }
+}
+
+object Product {
+  val waitVal = "wait"
+  val take = "take"
+}
+
+import akka.actor.{Actor, ActorRef}
+
+class Doorman(max: Int) extends Actor {
+  var in: Int = 0
+  val sticks: Array[Boolean] = new Array[Boolean](max + 1);
+
+  override def receive: Receive = {
+    case (x: Int, "") => if (in < max) {
+      in += 1;
+      sender() ! Philosopher.goIn
+    } else sender() ! Philosopher.again
+    case (x: Int, Philosopher.left) => if (!sticks(x)) {
+      sticks(x) = true;
+      sender() ! Philosopher.left
+    } else sender() ! Philosopher.again
+    case (x: Int, Philosopher.right) => if (!sticks((x + 1) % (max + 1))) {
+      sticks((x + 1) % (max + 1)) = true;
+      sender() ! Philosopher.right
+    } else sender() ! Philosopher.again
+    case (x: Int, Philosopher.end) => {
+      sticks(x) = false;
+      sticks((x + 1) % (max + 1)) = false;
+      in -= 1;
+    }
+  }
+}
