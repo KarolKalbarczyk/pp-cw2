@@ -40,17 +40,18 @@ class Philosopher(val number: Int, doorman: ActorRef) extends Actor {
     case Philosopher.right => {
       eat()
       doorman ! (number, Philosopher.end)
-      meditate()
       last = Philosopher.goIn
-      doorman ! (number, Philosopher.goIn)
+      meditate()
     }
   }
 
   def eat() = println(s"Philosopher number $number eating")
 
   def meditate(): Unit = {
-    var n = 0;
-    while (n != 10000) n += 1
+     def meditate(): Unit = {
+    context.system.scheduler.scheduleOnce(new FiniteDuration(100,TimeUnit.MILLISECONDS),
+      doorman,(number,Philosopher.goIn))(context.dispatcher,self)
+  }
   }
 }
 
@@ -120,7 +121,7 @@ class Doorman(max: Int) extends Actor {
   val sticks: Array[Boolean] = new Array[Boolean](max + 1);
 
   override def receive: Receive = {
-    case (x: Int, "") => if (in < max) {
+    case (x: Int, Philosopher.goIn) => if (in < max) {
       in += 1;
       sender() ! Philosopher.goIn
     } else sender() ! Philosopher.again
