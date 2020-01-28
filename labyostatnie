@@ -1,0 +1,97 @@
+
+data class Entity(val id:Long, val number:Double)
+
+sealed class Optional<out T> {
+    class Some<out T>(val element: T): Optional<T>()
+    object None: Optional<Nothing>()
+}
+
+val map = mapOf<Long,Entity>( 0L to Entity(0L,5.0),
+    1L to Entity(1L,3.0), 5L to Entity(2L,1.0) )
+
+object Main {
+    @JvmStatic
+    fun main(args: Array<String>) {
+        val a: Observable<Double> = listOf(1.0,2.0,3.0).toObservable()
+        val b : Observable<Double> = listOf(4.0,5.0,6.0).toObservable()
+        //zad1(a,b)
+       //zad2(a,b)
+       // zad3()
+        dodatkowe()
+        Thread.sleep(10000)
+    }
+
+    fun zad1(obs1 :Observable<Double>,obs2:Observable<Double>){
+        obs1.startWith(0.0).mergeWith(obs2.startWith(0.0)).scan {x,y -> x+y}.subscribe { println(it)}
+    }
+
+    fun zad2(obs1 :Observable<Double>,obs2:Observable<Double>) {
+        Observable.combineLatest(obs1.startWith(0.0),obs2.startWith(0.0), BiFunction { x:Double, y:Double -> x+y}).subscribe { println(it)}
+    }
+
+    fun zad3(){
+        Observable.intervalRange(0,10,0,1,TimeUnit.SECONDS)
+            .map { factorial(it.toInt()) }.subscribe { println(it)}
+    }
+
+    fun factorial(num:Int):Int =
+        when (num) {
+            0 -> 1
+            else -> num* factorial(num-1)
+        }
+
+    fun dodatkowe(){
+        val first = Observable.interval(0,100,TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io()).toFlowable(BackpressureStrategy.BUFFER)
+        val second  = Observable.interval(150,50,TimeUnit.MILLISECONDS)
+            .subscribeOn(Schedulers.io())
+            .filter {it%3 == 0L}
+            .toFlowable(BackpressureStrategy.ERROR)
+        val merge = Flowable.merge(first,second)
+            .observeOn(Schedulers.computation())
+        merge.map { dataBase(it)  }
+            .filter{ it is Optional.Some }
+            .map { (it as Optional.Some).element }
+            .doOnNext { println("received " + it ) }
+            .observeOn(Schedulers.io())
+            .map { getJSON(it) }
+            .subscribe { println("sending " + it)}
+    }
+
+    fun dataBase(id :Long):Optional<Entity> {
+        val entity  = map.get(id)
+        if (entity != null) return Optional.Some(entity) else return Optional.None
+    }
+
+    fun getJSON(entity:Entity) = entity.toString()
+
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    var foo: {def method(input:String):String} = new Bar()
+  }
+
+  def quacker(duck: {def makeNoise(value: String): String}) {
+    println (duck.makeNoise("aaaaaaaaaaa"))
+  }
+}
+
+class Foo {
+  def method(input: String) = input
+}
+class Bar{
+  def method(input: String) = input
+}
+
+case class Person(lastName:String, name:String) extends Ordered[Person] {
+  override def compare(that: Person): Int = {
+    val x = lastName.compare(that.lastName)
+    if (x == 0)
+      name.compare(that.name)
+    else x
+  }
+}
+
+
+
+}
